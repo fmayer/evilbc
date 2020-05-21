@@ -18,12 +18,12 @@
 
 namespace evilbc {
 
-thread_local bool in_evilbc = false;
+thread_local ThreadState thread_state;
 
-Scope::Scope() : prev_(in_evilbc) {
-  in_evilbc = true;
+Scope::Scope() : prev_(thread_state.in_evilbc) {
+  thread_state.in_evilbc = true;
 }
 Scope::~Scope() {
-  in_evilbc = prev_;
+  thread_state.in_evilbc = prev_;
 }
 }

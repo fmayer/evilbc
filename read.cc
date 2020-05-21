@@ -25,7 +25,7 @@
 namespace evilbc {
 EVILBC_EXPORT
 extern "C" ssize_t read(int fd, void *buf, size_t count) {
-  if (in_evilbc) {
+  if (thread_state.in_evilbc) {
     return EVILBC_RUN_LIBC(read, fd, buf, count);
   }
 

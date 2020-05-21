@@ -18,8 +18,10 @@
 #define EVILBC_RUN_LIBC(name, ...) decltype(&name)(dlsym(RTLD_NEXT, #name))(__VA_ARGS__)
 
 namespace evilbc {
-
-extern thread_local bool in_evilbc;
+struct ThreadState {
+	bool in_evilbc = false;
+};
+extern thread_local ThreadState thread_state;
 
 // Scope that indicates we are within evilbc. Any evilbc functions will
 // forward their arguments to the backing libc.
