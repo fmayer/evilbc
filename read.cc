@@ -36,12 +36,17 @@ extern "C" ssize_t read(int fd, void *buf, size_t count) {
     errno = EBADF;
     return -1;
   }
-  switch (statbuf.st_mode & S_IFMT) {
-    case S_IFSOCK:
-    case S_IFIFO:
-      return EVILBC_RUN_LIBC(read, fd, buf, count - 1);
-    default:
-      return EVILBC_RUN_LIBC(read, fd, buf, count);
+  if (S_TYPEISSHM(&statbuf)) {
+    abort();
   }
+  if (is_strict_posix() || S_ISSOCK(statbuf.st_mode) ||
+      S_ISFIFO(statbuf.st_mode)) {
+    if (rand_bool()) {
+      errno = EINTR;
+      return -1;
+    }
+    return EVILBC_RUN_LIBC(read, fd, buf, count - 1);
+  }
+  return EVILBC_RUN_LIBC(read, fd, buf, count);
 }
 }  // namespace evilbc

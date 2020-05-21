@@ -16,9 +16,29 @@
 
 #include "base.h"
 
-namespace evilbc {
+#include <string.h>
 
+namespace evilbc {
+namespace {
+bool get_strict_posix() {
+  char* e = getenv("EVILBC_STRICT_POSIX");
+  if (e == nullptr) {
+    return false;
+  }
+  return strncmp(e, "1", 1) == 0;
+}
+}  // namespace
 thread_local ThreadState thread_state;
+
+bool rand_bool() {
+  std::discrete_distribution<> d({0, 1});
+  return d(thread_state.rand);
+}
+
+bool is_strict_posix() {
+  static bool strict = get_strict_posix();
+  return strict;
+}
 
 Scope::Scope() : prev_(thread_state.in_evilbc) {
   thread_state.in_evilbc = true;

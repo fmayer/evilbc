@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <random>
+
 #define EVILBC_EXPORT __attribute__((visibility("default")))
 #define EVILBC_RUN_LIBC(name, ...) \
   decltype (&name)(dlsym(RTLD_NEXT, #name))(__VA_ARGS__)
@@ -21,8 +23,14 @@
 namespace evilbc {
 struct ThreadState {
   bool in_evilbc = false;
+  std::mt19937 rand;
 };
+
 extern thread_local ThreadState thread_state;
+
+bool rand_bool();
+
+bool is_strict_posix();
 
 // Scope that indicates we are within evilbc. Any evilbc functions will
 // forward their arguments to the backing libc.
