@@ -25,7 +25,7 @@
 namespace evilbc {
 EVILBC_EXPORT
 extern "C" ssize_t read(int fd, void *buf, size_t count) {
-  if (thread_state.in_evilbc) {
+  if (thread_state.in_evilbc()) {
     return EVILBC_RUN_LIBC(read, fd, buf, count);
   }
 
@@ -39,13 +39,24 @@ extern "C" ssize_t read(int fd, void *buf, size_t count) {
   if (S_TYPEISSHM(&statbuf)) {
     abort();
   }
+  // Regular files don't appear to get short reads on Linux, but POSIX has
+  // nothing to say on the matter.
+  // It states simply:
+  //   If a read() is interrupted by a signal before it reads any data,
+  //   it shall return -1 with errno set to [EINTR].
+  //
+  //   If a read() is interrupted by a signal after it has successfully read
+  //   some data, it shall return the number of bytes read.
+  // -- https://pubs.opengroup.org/onlinepubs/009695399/functions/read.html
   if (is_strict_posix() || S_ISSOCK(statbuf.st_mode) ||
       S_ISFIFO(statbuf.st_mode)) {
-    if (rand_bool()) {
+    // Bias towards EINTR, so every callsite probably gets one.
+    if (thread_state.biased_rand_bool()) {
       errno = EINTR;
       return -1;
     }
-    return EVILBC_RUN_LIBC(read, fd, buf, count - 1);
+    std::uniform_int_distribution d(static_cast<size_t>(1u), count);
+    return EVILBC_RUN_LIBC(read, fd, buf, d(thread_state.rand()));
   }
   return EVILBC_RUN_LIBC(read, fd, buf, count);
 }

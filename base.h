@@ -21,14 +21,20 @@
   decltype (&name)(dlsym(RTLD_NEXT, #name))(__VA_ARGS__)
 
 namespace evilbc {
-struct ThreadState {
-  bool in_evilbc = false;
-  std::mt19937 rand;
+class ThreadState {
+ public:
+  friend class Scope;
+  std::mt19937& rand();
+  bool in_evilbc() { return in_evilbc_; }
+
+  bool biased_rand_bool() { return rand()() > (rand_.max() / 9u); }
+
+ private:
+  bool in_evilbc_ = false;
+  std::mt19937 rand_;
 };
 
 extern thread_local ThreadState thread_state;
-
-bool rand_bool();
 
 bool is_strict_posix();
 

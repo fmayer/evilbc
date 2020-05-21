@@ -30,18 +30,15 @@ bool get_strict_posix() {
 }  // namespace
 thread_local ThreadState thread_state;
 
-bool rand_bool() {
-  std::discrete_distribution<> d({0, 1});
-  return d(thread_state.rand);
-}
+std::mt19937& ThreadState::rand() { return rand_; }
 
 bool is_strict_posix() {
   static bool strict = get_strict_posix();
   return strict;
 }
 
-Scope::Scope() : prev_(thread_state.in_evilbc) {
-  thread_state.in_evilbc = true;
+Scope::Scope() : prev_(thread_state.in_evilbc_) {
+  thread_state.in_evilbc_ = true;
 }
-Scope::~Scope() { thread_state.in_evilbc = prev_; }
+Scope::~Scope() { thread_state.in_evilbc_ = prev_; }
 }  // namespace evilbc
