@@ -1,0 +1,32 @@
+name: Build Check
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build-linux:
+    name: Linux
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get -y -qq update
+          sudo apt-get -y -qq --no-install-recommends install \
+            cmake \
+            ninja-build \
+      - name: Configure & Build
+        uses: lukka/run-cmake@v2
+        with:
+          buildDirectory: ${{ runner.workspace }}/build/
+          cmakeAppendedArgs: >-
+            -G Ninja
+          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
