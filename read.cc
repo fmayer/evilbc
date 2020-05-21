@@ -48,7 +48,7 @@ extern "C" ssize_t read(int fd, void *buf, size_t count) {
   //   If a read() is interrupted by a signal after it has successfully read
   //   some data, it shall return the number of bytes read.
   // -- https://pubs.opengroup.org/onlinepubs/009695399/functions/read.html
-  if (is_strict_posix() || S_ISSOCK(statbuf.st_mode) ||
+  if (semantics() == kPosix || S_ISSOCK(statbuf.st_mode) ||
       S_ISFIFO(statbuf.st_mode)) {
     // Bias towards EINTR, so every callsite probably gets one.
     if (thread_state.biased_rand_bool()) {

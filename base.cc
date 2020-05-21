@@ -20,21 +20,28 @@
 
 namespace evilbc {
 namespace {
-bool get_strict_posix() {
-  char* e = getenv("EVILBC_STRICT_POSIX");
+Semantics get_semantics() {
+  char* e = getenv("EVILBC_SEMANTICS");
   if (e == nullptr) {
-    return false;
+    return kGlibc;
   }
-  return strncmp(e, "1", 1) == 0;
+
+  if (strcasecmp(e, "glibc") == 0) {
+    return kGlibc;
+  }
+  if (strcasecmp(e, "posix") == 0) {
+    return kPosix;
+  }
+  abort();
 }
 }  // namespace
 thread_local ThreadState thread_state;
 
 std::mt19937& ThreadState::rand() { return rand_; }
 
-bool is_strict_posix() {
-  static bool strict = get_strict_posix();
-  return strict;
+Semantics semantics() {
+  static Semantics s = get_semantics();
+  return s;
 }
 
 Scope::Scope() : prev_(thread_state.in_evilbc_) {

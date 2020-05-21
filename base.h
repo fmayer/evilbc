@@ -36,7 +36,9 @@ class ThreadState {
 
 extern thread_local ThreadState thread_state;
 
-bool is_strict_posix();
+enum Semantics { kPosix, kGlibc };
+
+Semantics semantics();
 
 // Scope that indicates we are within evilbc. Any evilbc functions will
 // forward their arguments to the backing libc.
