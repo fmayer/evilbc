@@ -15,10 +15,10 @@
  */
 
 #include <dlfcn.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "base.h"
 
@@ -37,11 +37,11 @@ extern "C" ssize_t read(int fd, void *buf, size_t count) {
     return -1;
   }
   switch (statbuf.st_mode & S_IFMT) {
-  case S_IFSOCK:
-  case S_IFIFO:
-    return EVILBC_RUN_LIBC(read, fd, buf, count - 1);
-  default:
-    return EVILBC_RUN_LIBC(read, fd, buf, count);
+    case S_IFSOCK:
+    case S_IFIFO:
+      return EVILBC_RUN_LIBC(read, fd, buf, count - 1);
+    default:
+      return EVILBC_RUN_LIBC(read, fd, buf, count);
   }
 }
-}
+}  // namespace evilbc

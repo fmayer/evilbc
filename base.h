@@ -15,22 +15,24 @@
  */
 
 #define EVILBC_EXPORT __attribute__((visibility("default")))
-#define EVILBC_RUN_LIBC(name, ...) decltype(&name)(dlsym(RTLD_NEXT, #name))(__VA_ARGS__)
+#define EVILBC_RUN_LIBC(name, ...) \
+  decltype (&name)(dlsym(RTLD_NEXT, #name))(__VA_ARGS__)
 
 namespace evilbc {
 struct ThreadState {
-	bool in_evilbc = false;
+  bool in_evilbc = false;
 };
 extern thread_local ThreadState thread_state;
 
 // Scope that indicates we are within evilbc. Any evilbc functions will
 // forward their arguments to the backing libc.
 class Scope {
-  public:
-    Scope();
-    ~Scope();
-  private:
-    bool prev_;
+ public:
+  Scope();
+  ~Scope();
+
+ private:
+  bool prev_;
 };
 
-}
+}  // namespace evilbc

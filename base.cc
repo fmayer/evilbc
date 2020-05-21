@@ -23,7 +23,5 @@ thread_local ThreadState thread_state;
 Scope::Scope() : prev_(thread_state.in_evilbc) {
   thread_state.in_evilbc = true;
 }
-Scope::~Scope() {
-  thread_state.in_evilbc = prev_;
-}
-}
+Scope::~Scope() { thread_state.in_evilbc = prev_; }
+}  // namespace evilbc
