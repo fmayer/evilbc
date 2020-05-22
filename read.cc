@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <assert.h>
 #include <dlfcn.h>
 #include <errno.h>
 #include <sys/stat.h>
@@ -48,8 +49,7 @@ extern "C" ssize_t read(int fd, void *buf, size_t count) {
   //   If a read() is interrupted by a signal after it has successfully read
   //   some data, it shall return the number of bytes read.
   // -- https://pubs.opengroup.org/onlinepubs/009695399/functions/read.html
-  if (semantics() == kPosix || S_ISSOCK(statbuf.st_mode) ||
-      S_ISFIFO(statbuf.st_mode)) {
+  if (semantics() == kPosix || S_ISSOCK(statbuf.st_mode)) {
     // Bias towards EINTR, so every callsite probably gets one.
     if (thread_state.biased_rand_bool()) {
       errno = EINTR;
@@ -57,6 +57,25 @@ extern "C" ssize_t read(int fd, void *buf, size_t count) {
     }
     std::uniform_int_distribution d(static_cast<size_t>(1u), count);
     return EVILBC_RUN_LIBC(read, fd, buf, d(thread_state.rand()));
+  }
+  if (S_ISFIFO(statbuf.st_mode)) {
+    // On Linux 4.x, which is new enough to still care about, read(2) on a pipe
+    // can return after only having read one of its buffers. On 5.x it only
+    // returns after the pipe is empty or the requested number of bytes have
+    // been read.
+    // These buffers are page sized, so we simulate by reading some number
+    // of pages.
+    // https://elixir.bootlin.com/linux/v4.20.17/source/fs/pipe.c#L324
+    long page_sz = sysconf(_SC_PAGESIZE);
+    size_t count_pages = count / page_sz;
+    if (count % page_sz) count_pages++;
+
+    std::uniform_int_distribution d(static_cast<size_t>(1u), count_pages);
+    size_t read_pages = d(thread_state.rand());
+    size_t read_bytes =
+        read_pages == count_pages ? count : count_pages * page_sz;
+    assert(read_bytes <= count);
+    return EVILBC_RUN_LIBC(read, fd, buf, read_bytes);
   }
   return EVILBC_RUN_LIBC(read, fd, buf, count);
 }
