@@ -70,6 +70,7 @@ extern "C" ssize_t read(int fd, void *buf, size_t count) {
     size_t count_pages = count / page_sz;
     if (count % page_sz) count_pages++;
 
+    assert(count_pages > 0);
     std::uniform_int_distribution d(static_cast<size_t>(1u), count_pages);
     size_t read_pages = d(thread_state.rand());
     size_t read_bytes =
