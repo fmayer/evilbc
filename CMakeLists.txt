@@ -24,6 +24,7 @@ add_library(
         base.h
         base.cc
         read.cc
+        recv.cc
 )
 
 target_link_libraries(
