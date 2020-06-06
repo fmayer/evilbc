@@ -16,6 +16,7 @@
 
 #include <dlfcn.h>
 #include <errno.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 
@@ -31,6 +32,15 @@ extern "C" ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
   }
 
   Scope s;
+
+  int socktype;
+  socklen_t socktype_len = sizeof(socktype);
+  if (getsockopt(sockfd, SOL_SOCKET, SO_TYPE, &socktype, &socktype_len) == -1 ||
+      socktype != SOCK_STREAM) {
+    return EVILBC_RUN_LIBC(recvfrom, sockfd, buf, len, flags, src_addr,
+                           addrlen);
+  }
+
   // Bias towards EINTR, so every callsite probably gets one.
   if (thread_state.biased_rand_bool()) {
     errno = EINTR;
@@ -53,6 +63,12 @@ extern "C" ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags) {
   }
 
   Scope s;
+  int socktype;
+  socklen_t socktype_len = sizeof(socktype);
+  if (getsockopt(sockfd, SOL_SOCKET, SO_TYPE, &socktype, &socktype_len) == -1 ||
+      socktype != SOCK_STREAM) {
+    return EVILBC_RUN_LIBC(recvmsg, sockfd, msg, flags);
+  }
 
   if (msg->msg_iovlen == 0) {
     return 0;
@@ -84,7 +100,7 @@ extern "C" ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags) {
                                          last_iovec.iov_len);
   last_iovec.iov_len = iovlen_d(thread_state.rand());
   ssize_t r = EVILBC_RUN_LIBC(recvmsg, sockfd, &new_msg, flags);
-  msg->msg_name = new_msg.msg_name;
+  memcpy(msg->msg_name, new_msg.msg_name, new_msg.msg_namelen);
   msg->msg_namelen = new_msg.msg_namelen;
   return r;
 }
