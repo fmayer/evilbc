@@ -58,6 +58,14 @@ extern "C" ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags) {
     return 0;
   }
 
+  size_t total_size = 0;
+  for (size_t i = 0; i < msg->msg_iovlen; ++i) {
+    total_size += msg->msg_iov[i].iov_len;
+  }
+  if (total_size == 0) {
+    return 0;
+  }
+
   // Bias towards EINTR, so every callsite probably gets one.
   if (thread_state.biased_rand_bool()) {
     errno = EINTR;
