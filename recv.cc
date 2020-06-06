@@ -53,17 +53,25 @@ extern "C" ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags) {
   }
 
   Scope s;
+
+  if (msg->msg_iovlen == 0) {
+    return 0;
+  }
+
   // Bias towards EINTR, so every callsite probably gets one.
   if (thread_state.biased_rand_bool()) {
     errno = EINTR;
     return -1;
   }
-
   struct msghdr new_msg = *msg;
   std::uniform_int_distribution msg_iovlen_d(static_cast<size_t>(1u),
                                              new_msg.msg_iovlen);
   new_msg.msg_iovlen = msg_iovlen_d(thread_state.rand());
-  struct iovec &last_iovec = new_msg.msg_iov[msg->msg_iovlen - 1];
+  struct iovec &last_iovec = new_msg.msg_iov[new_msg.msg_iovlen - 1];
+  if (last_iovec.iov_len == 0) {
+    errno = EINTR;
+    return -1;
+  }
   std::uniform_int_distribution iovlen_d(static_cast<size_t>(1u),
                                          last_iovec.iov_len);
   last_iovec.iov_len = iovlen_d(thread_state.rand());
