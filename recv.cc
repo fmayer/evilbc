@@ -59,6 +59,8 @@ extern "C" ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags) {
     return EVILBC_RUN_LIBC(recvmsg, sockfd, msg, flags);
   }
 
+  Scope s;
+
   if (!is_stream_sock(sockfd)) {
     return EVILBC_RUN_LIBC(recvmsg, sockfd, msg, flags);
   }
