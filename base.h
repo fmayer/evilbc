@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <dlfcn.h>
+
 #include <random>
 
 #define EVILBC_EXPORT __attribute__((visibility("default")))
@@ -39,6 +41,8 @@ extern thread_local ThreadState thread_state;
 enum Semantics { kPosix, kGlibc };
 
 Semantics semantics();
+
+bool is_stream_sock(int sockfd);
 
 // Scope that indicates we are within evilbc. Any evilbc functions will
 // forward their arguments to the backing libc.

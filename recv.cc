@@ -33,10 +33,7 @@ extern "C" ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
 
   Scope s;
 
-  int socktype;
-  socklen_t socktype_len = sizeof(socktype);
-  if (getsockopt(sockfd, SOL_SOCKET, SO_TYPE, &socktype, &socktype_len) == -1 ||
-      socktype != SOCK_STREAM) {
+  if (!is_stream_sock(sockfd)) {
     return EVILBC_RUN_LIBC(recvfrom, sockfd, buf, len, flags, src_addr,
                            addrlen);
   }
@@ -62,11 +59,7 @@ extern "C" ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags) {
     return EVILBC_RUN_LIBC(recvmsg, sockfd, msg, flags);
   }
 
-  Scope s;
-  int socktype;
-  socklen_t socktype_len = sizeof(socktype);
-  if (getsockopt(sockfd, SOL_SOCKET, SO_TYPE, &socktype, &socktype_len) == -1 ||
-      socktype != SOCK_STREAM) {
+  if (!is_stream_sock(sockfd)) {
     return EVILBC_RUN_LIBC(recvmsg, sockfd, msg, flags);
   }
 

@@ -17,6 +17,7 @@
 #include "base.h"
 
 #include <string.h>
+#include <sys/socket.h>
 
 namespace evilbc {
 namespace {
@@ -48,4 +49,13 @@ Scope::Scope() : prev_(thread_state.in_evilbc_) {
   thread_state.in_evilbc_ = true;
 }
 Scope::~Scope() { thread_state.in_evilbc_ = prev_; }
+
+bool is_stream_sock(int sockfd) {
+  int socktype;
+  socklen_t socktype_len = sizeof(socktype);
+  return (getsockopt(sockfd, SOL_SOCKET, SO_TYPE, &socktype, &socktype_len) !=
+              -1 &&
+          socktype == SOCK_STREAM);
+}
+
 }  // namespace evilbc
