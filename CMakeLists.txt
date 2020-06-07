@@ -25,6 +25,7 @@ add_library(
         base.cc
         read.cc
         recv.cc
+        sleep.cc
 )
 
 target_link_libraries(
