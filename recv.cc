@@ -97,6 +97,8 @@ extern "C" ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags) {
   ssize_t r = EVILBC_RUN_LIBC(recvmsg, sockfd, &new_msg, flags);
   memcpy(msg->msg_name, new_msg.msg_name, new_msg.msg_namelen);
   msg->msg_namelen = new_msg.msg_namelen;
+  msg->msg_control = new_msg.msg_control;
+  msg->msg_controllen = new_msg.msg_controllen;
   return r;
 }
 }  // namespace evilbc
