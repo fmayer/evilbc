@@ -70,6 +70,8 @@ extern "C" ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags) {
     total_size += msg->msg_iov[i].iov_len;
   }
   if (total_size == 0) {
+    // Call the underlying implementation with length 0 so that msg->controllen
+    // etc. get set correctly.
     return EVILBC_RUN_LIBC(recvmsg, sockfd, msg, flags);
   }
 
