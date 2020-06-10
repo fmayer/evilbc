@@ -40,6 +40,15 @@ thread_local ThreadState thread_state;
 
 std::mt19937& ThreadState::rand() { return rand_; }
 
+size_t ThreadState::randomize_size(size_t size) {
+  if (size < 2) {
+    return size;
+  }
+
+  std::uniform_int_distribution d(static_cast<size_t>(1u), size);
+  return d(rand());
+}
+
 Semantics semantics() {
   static Semantics s = get_semantics();
   return s;

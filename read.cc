@@ -57,8 +57,7 @@ extern "C" ssize_t read(int fd, void *buf, size_t count) {
       errno = EINTR;
       return -1;
     }
-    std::uniform_int_distribution d(static_cast<size_t>(1u), count);
-    return EVILBC_RUN_LIBC(read, fd, buf, d(thread_state.rand()));
+    return EVILBC_RUN_LIBC(read, fd, buf, thread_state.randomize_size(count));
   }
   if (S_ISFIFO(statbuf.st_mode)) {
     // On Linux 4.x, which is new enough to still care about, read(2) on a pipe
@@ -72,9 +71,7 @@ extern "C" ssize_t read(int fd, void *buf, size_t count) {
     size_t count_pages = count / page_sz;
     if (count % page_sz) count_pages++;
 
-    assert(count_pages > 0);
-    std::uniform_int_distribution d(static_cast<size_t>(1u), count_pages);
-    size_t read_pages = d(thread_state.rand());
+    size_t read_pages = thread_state.randomize_size(count_pages);
     size_t read_bytes =
         read_pages == count_pages ? count : count_pages * page_sz;
     assert(read_bytes <= count);

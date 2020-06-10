@@ -43,9 +43,9 @@ extern "C" ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
     errno = EINTR;
     return -1;
   }
-  std::uniform_int_distribution d(static_cast<size_t>(1u), len);
-  return EVILBC_RUN_LIBC(recvfrom, sockfd, buf, d(thread_state.rand()), flags,
-                         src_addr, addrlen);
+  return EVILBC_RUN_LIBC(recvfrom, sockfd, buf,
+                         thread_state.randomize_size(len), flags, src_addr,
+                         addrlen);
 }
 
 EVILBC_EXPORT
@@ -65,16 +65,12 @@ extern "C" ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags) {
     return EVILBC_RUN_LIBC(recvmsg, sockfd, msg, flags);
   }
 
-  if (msg->msg_iovlen == 0) {
-    return 0;
-  }
-
   size_t total_size = 0;
   for (size_t i = 0; i < msg->msg_iovlen; ++i) {
     total_size += msg->msg_iov[i].iov_len;
   }
   if (total_size == 0) {
-    return 0;
+    return EVILBC_RUN_LIBC(recvmsg, sockfd, msg, flags);
   }
 
   // Bias towards EINTR, so every callsite probably gets one.
@@ -83,17 +79,13 @@ extern "C" ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags) {
     return -1;
   }
   struct msghdr new_msg = *msg;
-  std::uniform_int_distribution msg_iovlen_d(static_cast<size_t>(1u),
-                                             new_msg.msg_iovlen);
-  new_msg.msg_iovlen = msg_iovlen_d(thread_state.rand());
+  new_msg.msg_iovlen = thread_state.randomize_size(new_msg.msg_iovlen);
   struct iovec &last_iovec = new_msg.msg_iov[new_msg.msg_iovlen - 1];
   if (last_iovec.iov_len == 0) {
     errno = EINTR;
     return -1;
   }
-  std::uniform_int_distribution iovlen_d(static_cast<size_t>(1u),
-                                         last_iovec.iov_len);
-  last_iovec.iov_len = iovlen_d(thread_state.rand());
+  last_iovec.iov_len = thread_state.randomize_size(last_iovec.iov_len);
   ssize_t r = EVILBC_RUN_LIBC(recvmsg, sockfd, &new_msg, flags);
   memcpy(msg->msg_name, new_msg.msg_name, new_msg.msg_namelen);
   msg->msg_namelen = new_msg.msg_namelen;

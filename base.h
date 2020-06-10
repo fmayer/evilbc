@@ -29,6 +29,8 @@ class ThreadState {
   std::mt19937& rand();
   bool in_evilbc() { return in_evilbc_; }
 
+  size_t randomize_size(size_t size);
+
   bool biased_rand_bool() { return rand()() > (rand_.max() / 9u); }
 
  private:
