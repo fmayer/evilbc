@@ -18,7 +18,7 @@
 
 #include <random>
 
-#define EVILBC_EXPORT __attribute__((visibility("default")))
+#define EVILBC_EXPORT __attribute__((visibility("default"))) extern "C"
 #define EVILBC_RUN_LIBC(name, ...) \
   decltype (&name)(dlsym(RTLD_NEXT, #name))(__VA_ARGS__)
 

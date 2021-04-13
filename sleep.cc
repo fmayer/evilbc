@@ -20,7 +20,7 @@
 
 namespace evilbc {
 EVILBC_EXPORT
-extern "C" unsigned int sleep(unsigned int seconds) {
+unsigned int sleep(unsigned int seconds) {
   if (thread_state.in_evilbc()) {
     return EVILBC_RUN_LIBC(sleep, seconds);
   }

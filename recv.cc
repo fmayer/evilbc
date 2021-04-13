@@ -24,8 +24,8 @@
 
 namespace evilbc {
 EVILBC_EXPORT
-extern "C" ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
-                            struct sockaddr *src_addr, socklen_t *addrlen) {
+ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
+                 struct sockaddr *src_addr, socklen_t *addrlen) {
   if (thread_state.in_evilbc()) {
     return EVILBC_RUN_LIBC(recvfrom, sockfd, buf, len, flags, src_addr,
                            addrlen);
@@ -49,12 +49,12 @@ extern "C" ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
 }
 
 EVILBC_EXPORT
-extern "C" ssize_t recv(int sockfd, void *buf, size_t len, int flags) {
+ssize_t recv(int sockfd, void *buf, size_t len, int flags) {
   return recvfrom(sockfd, buf, len, flags, nullptr, nullptr);
 }
 
 EVILBC_EXPORT
-extern "C" ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags) {
+ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags) {
   if (thread_state.in_evilbc()) {
     return EVILBC_RUN_LIBC(recvmsg, sockfd, msg, flags);
   }

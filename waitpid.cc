@@ -22,10 +22,10 @@
 namespace evilbc {
 
 EVILBC_EXPORT
-extern "C" pid_t wait(int *wstatus) { return waitpid(-1, wstatus, 0); }
+pid_t wait(int *wstatus) { return waitpid(-1, wstatus, 0); }
 
 EVILBC_EXPORT
-extern "C" pid_t waitpid(pid_t pid, int *wstatus, int options) {
+pid_t waitpid(pid_t pid, int *wstatus, int options) {
   if (thread_state.in_evilbc()) {
     return EVILBC_RUN_LIBC(waitpid, pid, wstatus, options);
   }
@@ -38,7 +38,7 @@ extern "C" pid_t waitpid(pid_t pid, int *wstatus, int options) {
 }
 
 EVILBC_EXPORT
-extern "C" int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options) {
+int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options) {
   if (thread_state.in_evilbc()) {
     return EVILBC_RUN_LIBC(waitid, idtype, id, infop, options);
   }
