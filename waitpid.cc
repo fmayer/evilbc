@@ -42,6 +42,7 @@ int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options) {
   if (thread_state.in_evilbc()) {
     return EVILBC_RUN_LIBC(waitid, idtype, id, infop, options);
   }
+  Scope s;
   if ((options & WNOHANG) == 0 && thread_state.biased_rand_bool()) {
     errno = EINTR;
     return -1;
