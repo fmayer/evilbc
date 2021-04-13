@@ -18,6 +18,9 @@
         recvmsg;
         read;
         sleep;
+        wait;
+        waitpid;
+        waitid;
     local:
         *;
 };

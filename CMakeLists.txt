@@ -28,8 +28,11 @@ add_library(
         read.cc
         recv.cc
         sleep.cc
+        waitpid.cc
 )
 
 target_link_libraries(
         evilbc
 )
+
+set_target_properties(evilbc PROPERTIES LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/version_script)
