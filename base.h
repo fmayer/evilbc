@@ -32,6 +32,7 @@ class ThreadState {
   size_t randomize_size(size_t size);
 
   bool biased_rand_bool() { return rand()() > (rand_.max() / 9u); }
+  bool unbiased_rand_bool() { return rand()() > (rand_.max() / 2u); }
 
  private:
   bool in_evilbc_ = false;

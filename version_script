@@ -13,14 +13,16 @@
 #  limitations under the License.      
 {
     global:
-        recvfrom;
-        recv;
-        recvmsg;
-        read;
-        sleep;
-        wait;
         waitpid;
         waitid;
+        wait;
+        sleep;
+        select;
+        recvmsg;
+        recvfrom;
+        recv;
+        read;
+        pselect;
     local:
         *;
 };

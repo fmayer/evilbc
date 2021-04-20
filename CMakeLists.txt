@@ -27,6 +27,7 @@ add_library(
         base.cc
         read.cc
         recv.cc
+        select.cc
         sleep.cc
         waitpid.cc
 )
